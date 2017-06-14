@@ -1,24 +1,30 @@
-# This is a template for a Python scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
+#!/usr/bin/python
+#
+# Scrapelinks.py - scrape the webpage for date and links and make a CSV file from them
+#
 
-# import scraperwiki
-# import lxml.html
-#
-# # Read in a page
-# html = scraperwiki.scrape("http://foo.com")
-#
-# # Find something on the page using css selectors
-# root = lxml.html.fromstring(html)
-# root.cssselect("div[align='left']")
-#
-# # Write out to the sqlite database using scraperwiki library
-# scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
-# scraperwiki.sql.select("* from data where 'name'='peter'")
+#Load some libs to help starting with requests to get the URL
+import requests
+#Load lxml to do the legwork sorting through the HTML. An alternative is BeautifulSoup but many sites recommend that you use lxml as the parser in BS so...
+from lxml import html
+#The commands to make a CSV file.
+import csv
 
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
+#We'll start by grabbing the page 
+page = requests.get('http://www.whittinghamparishcouncil.org.uk/agenda-minutes.php')
+
+# Then we take what we got from the page and turn that into HTML 
+html_content = html.fromstring(page.content)
+
+# Then, and here's the bit that looks tricky, we look for the the links to the minutes and scrape out the data we need
+
+#First we scrape out the date. This is the link text so we look for the text in any link with the class pdf.
+#We do this using xpath - a way of mapping where the bit we want is with respect to another element or the start of the page
+#In this instance we say start looking at a div with the id=accordion and then work down.
+
+minDate = html_content.xpath('//div[@id="accordion"]/div/a[@class="pdf"]/text()')
+
+#We do the same thing, but this time we want the URL of the minutes and that's in the href attribute of the link. 
+minLinks = html_content.xpath('//div[@id="accordion"]/div/a[@class="pdf"]/@href')
+
+print(minDate,minLinks)
